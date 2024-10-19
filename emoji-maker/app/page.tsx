@@ -6,7 +6,7 @@ import { EmojiGrid } from "@/components/EmojiGrid";
 import EmojiCard from '../components/EmojiCard';
 
 export default function Home() {
-  const [emojis, setEmojis] = useState<string[]>([]);
+  const [emojis, setEmojis] = useState<Array<{ src: string; likes: number }>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +22,7 @@ export default function Home() {
       const data = await response.json();
       console.log('Received data from server:', data);
       if (data.urls && data.urls.length > 0) {
-        setEmojis(prevEmojis => [...data.urls, ...prevEmojis]);
+        setEmojis(prevEmojis => [...prevEmojis, { src: data.urls[0], likes: 0 }]);
       } else if (data.error) {
         setError(`${data.error}${data.details ? ': ' + data.details : ''}`);
       } else {
