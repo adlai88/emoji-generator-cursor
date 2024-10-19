@@ -19,10 +19,11 @@ export default function Home() {
         body: JSON.stringify({ prompt })
       });
       const data = await response.json();
+      console.log('Received data from server:', data);
       if (data.urls && data.urls.length > 0) {
         setEmojis(prevEmojis => [...data.urls, ...prevEmojis]);
       } else if (data.error) {
-        setError(data.error);
+        setError(`${data.error}${data.details ? ': ' + data.details : ''}`);
       } else {
         setError('No emoji URLs received');
       }
