@@ -3,6 +3,8 @@
 import { useState } from "react";
 import EmojiForm from "@/components/emoji-form";
 import { EmojiGrid } from "@/components/EmojiGrid";
+import EmojiCard from '../components/EmojiCard';
+import { Download, Heart } from 'lucide-react';
 
 export default function Home() {
   const [emojis, setEmojis] = useState<string[]>([]);
@@ -35,13 +37,37 @@ export default function Home() {
     }
   };
 
+  const handleLike = (imageUrl: string) => {
+    // Implement like functionality
+    console.log('Liked:', imageUrl);
+  };
+
+  const handleDownload = (imageUrl: string) => {
+    // Implement download functionality
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = 'emoji.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">
-      <main className="max-w-4xl mx-auto">
+      <main className="flex min-h-screen flex-col items-center justify-between p-24">
         <h1 className="text-3xl font-bold mb-8 text-center">😎 Emoj maker</h1>
         <EmojiForm onEmojiGenerated={handleEmojiGenerated} isLoading={isLoading} />
         {error && <p className="text-red-500 mt-4">{error}</p>}
-        <EmojiGrid emojis={emojis} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
+          {emojis.map((imageUrl, index) => (
+            <EmojiCard
+              key={index}
+              imageUrl={imageUrl}
+              onLike={() => handleLike(imageUrl)}
+              onDownload={() => handleDownload(imageUrl)}
+            />
+          ))}
+        </div>
       </main>
     </div>
   );
