@@ -6,7 +6,7 @@ Use this guide to build a web app where users can give a text prompt to generate
 ## Create a form where users can put in prompt, and clicking on button that calls the replicate model to generate emoji
 ## Have a nice UI & animation when the emoji is blank or generating
 ## Display all the images ever generated in grid
-## When hover each emoj img, an icon button for download, and an icon button for like should shown up
+## When hovering over each emoj img, an icon button for download, and an icon button for like should show up
 
 # Relevant docs
 ## How to use replicate emoji generator model

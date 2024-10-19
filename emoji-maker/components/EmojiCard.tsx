@@ -1,46 +1,54 @@
-import React, { useState } from 'react';
+import Image from 'next/image';
+import { useState } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Download, Heart } from 'lucide-react';
 
 interface EmojiCardProps {
-  imageUrl: string;
-  onLike: () => void;
-  onDownload: () => void;
+  src: string;
+  alt: string;
 }
 
-const EmojiCard: React.FC<EmojiCardProps> = ({ imageUrl, onLike, onDownload }) => {
+export function EmojiCard({ src, alt }: EmojiCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
+  const handleDownload = () => {
+    // Implement download functionality
+    window.open(src, '_blank');
+  };
+
+  const handleLike = () => {
+    // Implement like functionality
+    console.log('Liked emoji:', src);
+  };
+
   return (
-    <Card
+    <Card 
       className="relative overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <img src={imageUrl} alt="Emoji" className="w-full h-full object-cover" />
+      <Image src={src} alt={alt} width={256} height={256} className="w-full h-auto" />
       {isHovered && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center space-x-2">
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-200">
           <Button
-            variant="secondary"
+            variant="ghost"
             size="icon"
-            onClick={onDownload}
-            title="Download"
+            className="mr-2 text-white hover:text-primary hover:bg-white"
+            onClick={handleDownload}
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-6 w-6" />
           </Button>
           <Button
-            variant="secondary"
+            variant="ghost"
             size="icon"
-            onClick={onLike}
-            title="Like"
+            className="text-white hover:text-primary hover:bg-white"
+            onClick={handleLike}
           >
-            <Heart className="h-4 w-4" />
+            <Heart className="h-6 w-6" />
           </Button>
         </div>
       )}
     </Card>
   );
-};
-
-export default EmojiCard;
+}
