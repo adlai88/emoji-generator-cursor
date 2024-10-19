@@ -6,21 +6,25 @@ interface EmojiGridProps {
 }
 
 export function EmojiGrid({ emojis }: EmojiGridProps) {
+  console.log('Emojis to render:', emojis);
   return (
     <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {emojis.map((emoji, index) => (
-        <Card key={index} className="p-0 overflow-hidden aspect-square">
-          <div className="relative w-full h-full">
-            <Image
-              src={emoji}
-              alt={`Generated emoji ${index + 1}`}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover"
-            />
-          </div>
-        </Card>
-      ))}
+      {emojis && emojis.length > 0 ? (
+        emojis.map((emoji, index) => (
+          <Card key={index} className="p-4 flex items-center justify-center">
+            <div className="relative w-32 h-32">
+              <Image
+                src={emoji}
+                alt={`Generated emoji ${index + 1}`}
+                layout="fill"
+                objectFit="contain"
+              />
+            </div>
+          </Card>
+        ))
+      ) : (
+        <div>No emojis to display</div>
+      )}
     </div>
   );
 }

@@ -4,7 +4,6 @@ import { useState } from "react";
 import EmojiForm from "@/components/emoji-form";
 import { EmojiGrid } from "@/components/EmojiGrid";
 import EmojiCard from '../components/EmojiCard';
-import { Download, Heart } from 'lucide-react';
 
 export default function Home() {
   const [emojis, setEmojis] = useState<string[]>([]);
@@ -53,22 +52,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <h1 className="text-3xl font-bold mb-8 text-center">😎 Emoj maker</h1>
-        <EmojiForm onEmojiGenerated={handleEmojiGenerated} isLoading={isLoading} />
-        {error && <p className="text-red-500 mt-4">{error}</p>}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
-          {emojis.map((imageUrl, index) => (
-            <EmojiCard
-              key={index}
-              imageUrl={imageUrl}
-              onLike={() => handleLike(imageUrl)}
-              onDownload={() => handleDownload(imageUrl)}
-            />
-          ))}
-        </div>
-      </main>
-    </div>
+    <main className="flex min-h-screen flex-col items-center p-8 bg-gradient-to-b from-blue-100 to-white dark:from-gray-900 dark:to-gray-800">
+      <h1 className="text-4xl font-bold mb-6 text-gray-800 dark:text-white">Emoji Maker</h1>
+      <EmojiForm onSubmit={handleEmojiGenerated} isLoading={isLoading} />
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      <EmojiGrid emojis={emojis} />
+    </main>
   );
 }

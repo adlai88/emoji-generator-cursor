@@ -3,16 +3,16 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 
 interface EmojiFormProps {
-  onEmojiGenerated: (prompt: string) => void;
+  onSubmit: (prompt: string) => void;
   isLoading: boolean;
 }
 
-export default function EmojiForm({ onEmojiGenerated, isLoading }: EmojiFormProps) {
+export default function EmojiForm({ onSubmit, isLoading }: EmojiFormProps) {
   const [prompt, setPrompt] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onEmojiGenerated(prompt);
+    onSubmit(prompt);
   };
 
   return (
