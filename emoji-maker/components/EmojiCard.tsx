@@ -7,10 +7,10 @@ import { Download, Heart } from 'lucide-react';
 interface EmojiCardProps {
   src: string;
   alt: string;
-  initialLikes?: number;
+  initialLikes: number;
 }
 
-export function EmojiCard({ src, alt, initialLikes = 0 }: EmojiCardProps) {
+export function EmojiCard({ src, alt, initialLikes }: EmojiCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(initialLikes);
