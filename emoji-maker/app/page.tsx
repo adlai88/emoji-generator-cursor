@@ -3,7 +3,7 @@
 import { useState } from "react";
 import EmojiForm from "@/components/emoji-form";
 import { EmojiGrid } from "@/components/EmojiGrid";
-import EmojiCard from '../components/EmojiCard';
+import { EmojiCard } from '../components/EmojiCard';
 
 export default function Home() {
   const [emojis, setEmojis] = useState<Array<{ src: string; likes: number }>>([]);
