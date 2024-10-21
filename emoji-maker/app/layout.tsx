@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import {
-ClerkProvider,
+  ClerkProvider,
+  SignedIn,
+  SignedOut,
 } from '@clerk/nextjs'
 import Header from "@/components/headers";
+import ClientSideComponent from '@/components/ClientSideComponent';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,17 +31,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY} signInUrl="/sign-in">
+    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <html lang="en">
         <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-b from-blue-100 to-white dark:from-gray-900 dark:to-gray-800 min-h-screen`}
         >
           <Header />
           <main className="container mx-auto px-4 py-8">
-            {children}
+            <ClientSideComponent />
+            <SignedIn>
+              <AuthenticatedLayout>{children}</AuthenticatedLayout>
+            </SignedIn>
+            <SignedOut>
+              {children}
+            </SignedOut>
           </main>
         </body>
       </html>
     </ClerkProvider>
   );
+}
+
+function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }
