@@ -3,7 +3,6 @@
 import { useState } from "react";
 import EmojiForm from "@/components/emoji-form";
 import { EmojiGrid } from "@/components/EmojiGrid";
-import { EmojiCard } from '../components/EmojiCard';
 
 export default function Home() {
   const [emojis, setEmojis] = useState<Array<{ src: string; likes: number }>>([]);
@@ -14,19 +13,18 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/generate-emoji', {
+      const response = await fetch('/api/generate-and-upload-emoji', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt })
       });
       const data = await response.json();
-      console.log('Received data from server:', data);
-      if (data.urls && data.urls.length > 0) {
-        setEmojis(prevEmojis => [...prevEmojis, { src: data.urls[0], likes: 0 }]);
+      if (data.emoji) {
+        setEmojis(prevEmojis => [...prevEmojis, { src: data.emoji.image_url, likes: 0 }]);
       } else if (data.error) {
-        setError(`${data.error}${data.details ? ': ' + data.details : ''}`);
+        setError(`${data.error}`);
       } else {
-        setError('No emoji URLs received');
+        setError('No emoji generated');
       }
     } catch (error) {
       console.error('Error generating emoji:', error);

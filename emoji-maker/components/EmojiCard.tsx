@@ -60,7 +60,7 @@ export function EmojiCard({ src, alt, initialLikes = 0 }: EmojiCardProps) {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Image src={src} alt={alt} width={256} height={256} className="w-full h-auto" />
-      {(isHovered || isLiked) && (
+      {(isHovered) && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-200">
           <Button
             variant="ghost"
