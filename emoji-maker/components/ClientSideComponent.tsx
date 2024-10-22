@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function ClientSideComponent() {
-  const router = useRouter();
 
   useEffect(() => {
     const createUserProfile = async () => {
