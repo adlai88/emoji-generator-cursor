@@ -63,6 +63,31 @@ export default function Home() {
     }
   };
 
+  const handleLike = async (emojiId: number, liked: boolean) => {
+    try {
+      const response = await fetch('/api/like-emoji', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emojiId, liked })
+      });
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      // Update the emojis state with the new like count
+      setEmojis(prevEmojis =>
+        prevEmojis.map(emoji =>
+          emoji.id === emojiId
+            ? { ...emoji, likes_count: liked ? emoji.likes_count + 1 : emoji.likes_count - 1 }
+            : emoji
+        )
+      );
+    } catch (error) {
+      console.error('Error updating like:', error);
+      throw error;
+    }
+  };
+
   if (!isLoaded) {
     return <div>Loading...</div>;
   }
@@ -74,7 +99,7 @@ export default function Home() {
         <>
           <EmojiForm onSubmit={handleEmojiGenerated} isLoading={isLoading} />
           {error && <p className="text-red-500 mb-4">{error}</p>}
-          <EmojiGrid emojis={emojis} />
+          <EmojiGrid emojis={emojis} onLike={handleLike} />
         </>
       ) : (
         <p>Please sign in to use the Emoji Maker.</p>

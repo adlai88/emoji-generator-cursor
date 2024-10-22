@@ -28,8 +28,9 @@ TABLE profiles (
 
 TABLE emoji_likes (
   user_id TEXT REFERENCES profiles(user_id),
-  emoji_id BIGINT REFERENCES emojis(id),
-  PRIMARY KEY (user_id, emoji_id)
+  liked_emojis BIGINT[],
+  total_likes INTEGER DEFAULT 0,
+  PRIMARY KEY (user_id)
 );
 
 # Requirements
@@ -45,9 +46,15 @@ TABLE emoji_likes (
    1. Emoji grid should fetch and display all images from "emojis" data table
    2. when a new emoji is generated, the emojigrid should be updated automatically to add the new emoji to the grid
 4. Likes interaction
-   1. When user check on 'like' button, the num_likes should increase on the 'emojis' table
-   2. when user un-check 'like' button, the num_likes should decrease on the 'emojis' table
-
+   1. When a user clicks the 'like' button:
+      - Add the emoji's id to the `liked_emojis` array in the `emoji_likes` table for the user
+      - Increment the `total_likes` for the user in the `emoji_likes` table
+      - Increment the `likes_count` for the emoji in the `emojis` table
+   2. When a user un-checks the 'like' button:
+      - Remove the emoji's id from the `liked_emojis` array in the `emoji_likes` table for the user
+      - Decrement the `total_likes` for the user in the `emoji_likes` table
+      - Decrement the `likes_count` for the emoji in the `emojis` table
+   3. Ensure that a user can only like an emoji once (check if the emoji id is already in the `liked_emojis` array)
 
 # Documentations
 ## Example of uploading files to supabase storage

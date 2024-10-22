@@ -5,21 +5,24 @@ import { Button } from './ui/button';
 import { Download, Heart } from 'lucide-react';
 
 interface EmojiCardProps {
+  id: number;
   src: string;
   alt: string;
   initialLikes: number;
+  onLike: (id: number, liked: boolean) => Promise<void>;
 }
 
-export function EmojiCard({ src, alt, initialLikes }: EmojiCardProps) {
+export function EmojiCard({ id, src, alt, initialLikes, onLike }: EmojiCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(initialLikes);
+  const [isHeartHovered, setIsHeartHovered] = useState(false);
 
   useEffect(() => {
     // Check if the image is liked in local storage
     const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
-    setIsLiked(!!likedImages[src]);
-  }, [src]);
+    setIsLiked(!!likedImages[id]);
+  }, [id]);
 
   const handleDownload = async () => {
     try {
@@ -38,7 +41,7 @@ export function EmojiCard({ src, alt, initialLikes }: EmojiCardProps) {
     }
   };
 
-  const handleLike = () => {
+  const handleLike = async () => {
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
     setLikeCount(prevCount => newLikedState ? prevCount + 1 : prevCount - 1);
@@ -46,11 +49,21 @@ export function EmojiCard({ src, alt, initialLikes }: EmojiCardProps) {
     // Update local storage
     const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
     if (newLikedState) {
-      likedImages[src] = true;
+      likedImages[id] = true;
     } else {
-      delete likedImages[src];
+      delete likedImages[id];
     }
     localStorage.setItem('likedImages', JSON.stringify(likedImages));
+
+    // Call the onLike function to update the backend
+    try {
+      await onLike(id, newLikedState);
+    } catch (error) {
+      console.error('Error updating like:', error);
+      // Revert the like state if the API call fails
+      setIsLiked(!newLikedState);
+      setLikeCount(prevCount => newLikedState ? prevCount - 1 : prevCount + 1);
+    }
   };
 
   return (
@@ -60,7 +73,7 @@ export function EmojiCard({ src, alt, initialLikes }: EmojiCardProps) {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Image src={src} alt={alt} width={256} height={256} className="w-full h-auto" />
-      {(isHovered) && (
+      {isHovered && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-200">
           <Button
             variant="ghost"
@@ -73,10 +86,22 @@ export function EmojiCard({ src, alt, initialLikes }: EmojiCardProps) {
           <Button
             variant="ghost"
             size="icon"
-            className={`text-white hover:text-primary hover:bg-white ${isLiked ? 'text-red-500' : ''}`}
+            className={`text-white hover:bg-white ${isLiked ? 'hover:text-black' : 'hover:text-red-500'}`}
             onClick={handleLike}
+            onMouseEnter={() => setIsHeartHovered(true)}
+            onMouseLeave={() => setIsHeartHovered(false)}
           >
-            <Heart className={`h-6 w-6 ${isLiked ? 'fill-current' : ''}`} />
+            <Heart 
+              className={`h-6 w-6 ${
+                isLiked 
+                  ? isHeartHovered 
+                    ? 'text-black' 
+                    : 'text-white stroke-2' 
+                  : isHeartHovered 
+                    ? 'text-red-500 fill-current' 
+                    : 'text-red-500 fill-current'
+              }`} 
+            />
           </Button>
         </div>
       )}
