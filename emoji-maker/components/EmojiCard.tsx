@@ -21,8 +21,27 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
   useEffect(() => {
     const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
     setIsLiked(!!likedImages[id]);
-    setLikeCount(currentLikes); // This is correct
+    setLikeCount(currentLikes);
   }, [id, currentLikes]);
+
+  const handleLike = async () => {
+    try {
+      await onLike(id, !isLiked);
+      setIsLiked(!isLiked);
+      setLikeCount(prevCount => isLiked ? prevCount - 1 : prevCount + 1);
+      
+      // Update local storage
+      const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
+      if (isLiked) {
+        delete likedImages[id];
+      } else {
+        likedImages[id] = true;
+      }
+      localStorage.setItem('likedImages', JSON.stringify(likedImages));
+    } catch (error) {
+      console.error('Error updating like:', error);
+    }
+  };
 
   const handleDownload = async () => {
     try {
@@ -38,35 +57,6 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading image:', error);
-    }
-  };
-
-  const handleLike = async (emojiId: number, liked: boolean) => {
-    try {
-      const response = await fetch('/api/like-emoji', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emojiId, liked })
-      });
-      const data = await response.json();
-      console.log('Server response:', data);
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      // Update the emojis state with the new likes count from the server
-      setEmojis(prevEmojis =>
-        prevEmojis.map(emoji =>
-          emoji.id === emojiId
-            ? { ...emoji, likes_count: data.likesCount }
-            : emoji
-        )
-      );
-      console.log('Like updated successfully');
-      // Optionally, you can call fetchEmojis() here to refresh all emojis
-      // await fetchEmojis();
-    } catch (error) {
-      console.error('Error updating like:', error);
-      throw error;
     }
   };
 
