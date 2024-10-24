@@ -22,20 +22,14 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
     const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
     setIsLiked(!!likedImages[id]);
     setLikeCount(currentLikes);
-    console.log(`Emoji ${id} current likes:`, currentLikes); // Add this line
   }, [id, currentLikes]);
 
   const handleLike = async () => {
     const newIsLiked = !isLiked;
-    const newLikeCount = newIsLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
-    
-    // Optimistically update UI
-    setIsLiked(newIsLiked);
-    setLikeCount(newLikeCount);
-    
     try {
       const updatedLikeCount = await onLike(id, newIsLiked);
-      setLikeCount(updatedLikeCount); // Update with the count from the server
+      setIsLiked(newIsLiked);
+      setLikeCount(updatedLikeCount);
       
       // Update local storage
       const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
@@ -47,9 +41,6 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
       localStorage.setItem('likedImages', JSON.stringify(likedImages));
     } catch (error) {
       console.error('Error updating like:', error);
-      // Revert UI if the server request fails
-      setIsLiked(!newIsLiked);
-      setLikeCount(likeCount);
     }
   };
 
@@ -90,7 +81,7 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
           <Button
             variant="ghost"
             size="icon"
-            className={`text-white hover:bg-white ${isLiked ? 'hover:text-black' : 'hover:text-red-500'}`}
+            className={`text-white hover:bg-white ${isLiked ? 'hover:text-primary' : 'hover:text-red-500'}`}
             onClick={handleLike}
             onMouseEnter={() => setIsHeartHovered(true)}
             onMouseLeave={() => setIsHeartHovered(false)}
@@ -98,12 +89,10 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
             <Heart 
               className={`h-6 w-6 ${
                 isLiked 
-                  ? isHeartHovered 
-                    ? 'text-black' 
-                    : 'text-white stroke-2' 
-                  : isHeartHovered 
-                    ? 'text-red-500 fill-current' 
-                    : 'text-red-500 fill-current'
+                  ? isHeartHovered
+                    ? 'text-primary stroke-2 fill-none' // Black outline on hover when liked
+                    : 'text-white stroke-2 fill-none'   // White outline when not hovered and liked
+                  : 'text-red-500 fill-current'         // Always red when not liked
               }`} 
             />
           </Button>

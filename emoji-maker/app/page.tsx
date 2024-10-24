@@ -78,60 +78,31 @@ export default function Home() {
     };
   };
 
-  const debouncedLikeUpdate = useCallback((emojiId: number, liked: boolean) => {
-    return debounce(async () => {
-      try {
-        const response = await fetch('/api/like-emoji', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ emojiId, liked })
-        });
-        const data = await response.json();
-        console.log('Server response:', data);
-        if (data.error) {
-          throw new Error(data.error);
-        }
-        // Update with the actual server response
-        setEmojis(prevEmojis =>
-          prevEmojis.map(emoji =>
-            emoji.id === emojiId
-              ? { ...emoji, likes_count: data.likesCount }
-              : emoji
-          )
-        );
-        return data.likesCount;
-      } catch (error) {
-        console.error('Error updating like:', error);
-        throw error;
-      }
-    }, 300)();
-  }, [setEmojis]);
-
   const handleLike = async (emojiId: number, liked: boolean): Promise<number> => {
-    // Optimistically update the UI
-    setEmojis(prevEmojis =>
-      prevEmojis.map(emoji =>
-        emoji.id === emojiId
-          ? { ...emoji, likes_count: liked ? emoji.likes_count + 1 : Math.max(0, emoji.likes_count - 1) }
-          : emoji
-      )
-    );
-
     try {
-      const updatedLikeCount = await debouncedLikeUpdate(emojiId, liked);
-      return updatedLikeCount;
-    } catch (error) {
-      console.error('Error updating like:', error);
-      // Revert the optimistic update if there's an error
+      const response = await fetch('/api/like-emoji', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emojiId, liked })
+      });
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      // Update emojis state with the new like count
       setEmojis(prevEmojis =>
         prevEmojis.map(emoji =>
           emoji.id === emojiId
-            ? { ...emoji, likes_count: liked ? Math.max(0, emoji.likes_count - 1) : emoji.likes_count + 1 }
+            ? { ...emoji, likes_count: data.likesCount }
             : emoji
         )
       );
-      // Return the original like count if there's an error
-      return emojis.find(emoji => emoji.id === emojiId)?.likes_count || 0;
+      
+      return data.likesCount;
+    } catch (error) {
+      console.error('Error updating like:', error);
+      throw error;
     }
   };
 
