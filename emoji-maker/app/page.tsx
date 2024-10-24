@@ -78,9 +78,8 @@ export default function Home() {
     };
   };
 
-  const debouncedLikeUpdate = useCallback(
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    debounce(async (emojiId: number, liked: boolean) => {
+  const debouncedLikeUpdate = useCallback((emojiId: number, liked: boolean) => {
+    return debounce(async () => {
       try {
         const response = await fetch('/api/like-emoji', {
           method: 'POST',
@@ -105,11 +104,10 @@ export default function Home() {
         console.error('Error updating like:', error);
         throw error;
       }
-    }, 300),
-    []
-  );
+    }, 300)();
+  }, [setEmojis]);
 
-  const handleLike = async (emojiId: number, liked: boolean) => {
+  const handleLike = async (emojiId: number, liked: boolean): Promise<number> => {
     // Optimistically update the UI
     setEmojis(prevEmojis =>
       prevEmojis.map(emoji =>
@@ -123,6 +121,7 @@ export default function Home() {
       const updatedLikeCount = await debouncedLikeUpdate(emojiId, liked);
       return updatedLikeCount;
     } catch (error) {
+      console.error('Error updating like:', error);
       // Revert the optimistic update if there's an error
       setEmojis(prevEmojis =>
         prevEmojis.map(emoji =>
@@ -131,7 +130,8 @@ export default function Home() {
             : emoji
         )
       );
-      throw error;
+      // Return the original like count if there's an error
+      return emojis.find(emoji => emoji.id === emojiId)?.likes_count || 0;
     }
   };
 

@@ -8,7 +8,7 @@ interface Emoji {
 
 interface EmojiGridProps {
   emojis: Emoji[];
-  onLike: (id: number, liked: boolean) => Promise<void>;
+  onLike: (id: number, liked: boolean) => Promise<number>;
 }
 
 export function EmojiGrid({ emojis, onLike }: EmojiGridProps) {
