@@ -119,6 +119,7 @@ export default function Home() {
             : emoji
         )
       );
+      console.log('Like updated successfully');
     } catch (error) {
       console.error('Error updating like:', error);
       throw error;

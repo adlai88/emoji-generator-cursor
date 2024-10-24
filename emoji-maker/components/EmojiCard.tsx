@@ -12,17 +12,18 @@ interface EmojiCardProps {
   onLike: (id: number, liked: boolean) => Promise<void>;
 }
 
-export function EmojiCard({ id, src, alt, initialLikes, onLike }: EmojiCardProps) {
+export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(initialLikes);
+  const [likeCount, setLikeCount] = useState(currentLikes);
   const [isHeartHovered, setIsHeartHovered] = useState(false);
 
   useEffect(() => {
     // Check if the image is liked in local storage
     const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
     setIsLiked(!!likedImages[id]);
-  }, [id]);
+    setLikeCount(currentLikes);
+  }, [id, currentLikes]);
 
   const handleDownload = async () => {
     try {

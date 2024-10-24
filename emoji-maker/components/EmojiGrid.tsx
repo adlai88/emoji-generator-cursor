@@ -20,7 +20,7 @@ export function EmojiGrid({ emojis, onLike }: EmojiGridProps) {
           id={emoji.id}
           src={emoji.image_url}
           alt={`Emoji ${emoji.id}`}
-          initialLikes={emoji.likes_count}
+          currentLikes={emoji.likes_count}
           onLike={onLike}
         />
       ))}
