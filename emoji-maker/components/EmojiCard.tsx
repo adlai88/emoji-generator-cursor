@@ -19,10 +19,9 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
   const [isHeartHovered, setIsHeartHovered] = useState(false);
 
   useEffect(() => {
-    // Check if the image is liked in local storage
     const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
     setIsLiked(!!likedImages[id]);
-    setLikeCount(currentLikes);
+    setLikeCount(currentLikes); // This is correct
   }, [id, currentLikes]);
 
   const handleDownload = async () => {
@@ -42,28 +41,32 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
     }
   };
 
-  const handleLike = async () => {
-    const newLikedState = !isLiked;
-    setIsLiked(newLikedState);
-    setLikeCount(prevCount => newLikedState ? prevCount + 1 : prevCount - 1);
-
-    // Update local storage
-    const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
-    if (newLikedState) {
-      likedImages[id] = true;
-    } else {
-      delete likedImages[id];
-    }
-    localStorage.setItem('likedImages', JSON.stringify(likedImages));
-
-    // Call the onLike function to update the backend
+  const handleLike = async (emojiId: number, liked: boolean) => {
     try {
-      await onLike(id, newLikedState);
+      const response = await fetch('/api/like-emoji', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emojiId, liked })
+      });
+      const data = await response.json();
+      console.log('Server response:', data);
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      // Update the emojis state with the new likes count from the server
+      setEmojis(prevEmojis =>
+        prevEmojis.map(emoji =>
+          emoji.id === emojiId
+            ? { ...emoji, likes_count: data.likesCount }
+            : emoji
+        )
+      );
+      console.log('Like updated successfully');
+      // Optionally, you can call fetchEmojis() here to refresh all emojis
+      // await fetchEmojis();
     } catch (error) {
       console.error('Error updating like:', error);
-      // Revert the like state if the API call fails
-      setIsLiked(!newLikedState);
-      setLikeCount(prevCount => newLikedState ? prevCount - 1 : prevCount + 1);
+      throw error;
     }
   };
 

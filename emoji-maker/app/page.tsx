@@ -33,8 +33,9 @@ export default function Home() {
 
   const fetchEmojis = async () => {
     try {
-      const response = await fetch('/api/get-all-emojis');
+      const response = await fetch(`/api/get-all-emojis?t=${Date.now()}`);
       const data = await response.json();
+      console.log('Fetched emojis:', data); // Add this line
       if (data.emojis) {
         setEmojis(data.emojis);
       } else if (data.error) {
@@ -109,17 +110,21 @@ export default function Home() {
         body: JSON.stringify({ emojiId, liked })
       });
       const data = await response.json();
+      console.log('Server response:', data);
       if (data.error) {
         throw new Error(data.error);
       }
+      // Update the emojis state with the new likes count from the server
       setEmojis(prevEmojis =>
         prevEmojis.map(emoji =>
           emoji.id === emojiId
-            ? { ...emoji, likes_count: liked ? emoji.likes_count + 1 : emoji.likes_count - 1 }
+            ? { ...emoji, likes_count: data.likesCount }
             : emoji
         )
       );
       console.log('Like updated successfully');
+      // Optionally, you can call fetchEmojis() here to refresh all emojis
+      // await fetchEmojis();
     } catch (error) {
       console.error('Error updating like:', error);
       throw error;
