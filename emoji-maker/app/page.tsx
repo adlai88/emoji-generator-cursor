@@ -100,17 +100,10 @@ export default function Home() {
               : emoji
           )
         );
+        return data.likesCount;
       } catch (error) {
         console.error('Error updating like:', error);
-        // Revert the optimistic update if there's an error
-        setEmojis(prevEmojis =>
-          prevEmojis.map(emoji =>
-            emoji.id === emojiId
-              ? { ...emoji, likes_count: liked ? Math.max(0, emoji.likes_count - 1) : emoji.likes_count + 1 }
-              : emoji
-          )
-        );
-        throw error; // Rethrow the error so EmojiCard can handle it
+        throw error;
       }
     }, 300),
     []
@@ -127,27 +120,9 @@ export default function Home() {
     );
 
     try {
-      const response = await fetch('/api/like-emoji', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emojiId, liked })
-      });
-      const data = await response.json();
-      console.log('Server response:', data);
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      // Update with the actual server response
-      setEmojis(prevEmojis =>
-        prevEmojis.map(emoji =>
-          emoji.id === emojiId
-            ? { ...emoji, likes_count: data.likesCount }
-            : emoji
-        )
-      );
-      return data.likesCount; // Return the updated like count
+      const updatedLikeCount = await debouncedLikeUpdate(emojiId, liked);
+      return updatedLikeCount;
     } catch (error) {
-      console.error('Error updating like:', error);
       // Revert the optimistic update if there's an error
       setEmojis(prevEmojis =>
         prevEmojis.map(emoji =>
@@ -156,7 +131,7 @@ export default function Home() {
             : emoji
         )
       );
-      throw error; // Rethrow the error so EmojiCard can handle it
+      throw error;
     }
   };
 
