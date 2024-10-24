@@ -35,7 +35,7 @@ export default function Home() {
     try {
       const response = await fetch(`/api/get-all-emojis?t=${Date.now()}`);
       const data = await response.json();
-      console.log('Fetched emojis:', data); // Add this line
+      console.log('Fetched emojis:', data);
       if (data.emojis) {
         setEmojis(data.emojis);
       } else if (data.error) {
@@ -122,12 +122,9 @@ export default function Home() {
             : emoji
         )
       );
-      console.log('Like updated successfully');
-      // Optionally, you can call fetchEmojis() here to refresh all emojis
-      // await fetchEmojis();
+      console.log('Emojis after update:', emojis); // Add this line
     } catch (error) {
       console.error('Error updating like:', error);
-      throw error;
     }
   };
 

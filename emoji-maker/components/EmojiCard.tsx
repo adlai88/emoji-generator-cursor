@@ -22,6 +22,7 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
     const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
     setIsLiked(!!likedImages[id]);
     setLikeCount(currentLikes);
+    console.log(`Emoji ${id} current likes:`, currentLikes); // Add this line
   }, [id, currentLikes]);
 
   const handleLike = async () => {

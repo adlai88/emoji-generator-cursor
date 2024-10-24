@@ -12,6 +12,8 @@ export async function GET() {
       throw error;
     }
 
+    console.log('Fetched emojis:', data); // Add this line
+
     return NextResponse.json({ emojis: data });
   } catch (error) {
     console.error('Error fetching emojis:', error);

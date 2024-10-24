@@ -26,8 +26,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error updating like status' }, { status: 500 });
   }
 
+  console.log('Toggle like result:', data); // Add this line
+
   // The function now returns an array with one object
   const updatedLikesCount = data[0].likes_count;
+
+  console.log('Updated likes count:', updatedLikesCount); // Add this line
 
   return NextResponse.json({ success: true, likesCount: updatedLikesCount });
 }
