@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import EmojiForm from "@/components/emoji-form";
 import { EmojiGrid } from "@/components/EmojiGrid";
 import { useAuth } from "@clerk/nextjs";
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 interface Emoji {
   id: number;
@@ -20,6 +24,10 @@ export default function Home() {
   useEffect(() => {
     if (isLoaded && userId) {
       fetchEmojis();
+      const unsubscribe = subscribeToNewEmojis();
+      return () => {
+        unsubscribe();
+      };
     }
   }, [isLoaded, userId]);
 
@@ -36,6 +44,27 @@ export default function Home() {
       console.error('Error fetching emojis:', error);
       setError('Failed to fetch emojis');
     }
+  };
+
+  const subscribeToNewEmojis = () => {
+    console.log('Attempting to subscribe to emoji changes');
+    const channel = supabase
+      .channel('emoji_changes')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'emojis' },
+        (payload) => {
+          console.log('New emoji received:', payload.new);
+          setEmojis(prevEmojis => [payload.new as Emoji, ...prevEmojis]);
+        }
+      )
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
+
+    return () => {
+      console.log('Unsubscribing from emoji changes');
+      supabase.removeChannel(channel);
+    };
   };
 
   const handleEmojiGenerated = async (prompt: string) => {
@@ -74,7 +103,6 @@ export default function Home() {
       if (data.error) {
         throw new Error(data.error);
       }
-      // Update the emojis state with the new like count
       setEmojis(prevEmojis =>
         prevEmojis.map(emoji =>
           emoji.id === emojiId
