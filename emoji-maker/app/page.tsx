@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import debounce from 'lodash/debounce';
+import { useState, useEffect } from "react";
 import EmojiForm from "@/components/emoji-form";
 import { EmojiGrid } from "@/components/EmojiGrid";
 import { useAuth } from "@clerk/nextjs";
@@ -78,7 +77,7 @@ export default function Home() {
     };
   };
 
-  const handleLike = async (emojiId: number, liked: boolean): Promise<number> => {
+  const handleLike = async (emojiId: number, liked: boolean) => {
     try {
       const response = await fetch('/api/like-emoji', {
         method: 'POST',
@@ -89,8 +88,7 @@ export default function Home() {
       if (data.error) {
         throw new Error(data.error);
       }
-      
-      // Update emojis state with the new like count
+      // Update the emojis state with the new likes count from the server
       setEmojis(prevEmojis =>
         prevEmojis.map(emoji =>
           emoji.id === emojiId
@@ -98,7 +96,6 @@ export default function Home() {
             : emoji
         )
       );
-      
       return data.likesCount;
     } catch (error) {
       console.error('Error updating like:', error);
