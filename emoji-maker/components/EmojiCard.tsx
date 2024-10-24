@@ -8,8 +8,8 @@ interface EmojiCardProps {
   id: number;
   src: string;
   alt: string;
-  currentLikes: number;  // Change this from initialLikes to currentLikes
-  onLike: (id: number, liked: boolean) => Promise<void>;
+  currentLikes: number;
+  onLike: (id: number, liked: boolean) => Promise<number>;
 }
 
 export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps) {
@@ -27,14 +27,15 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
 
   const handleLike = async () => {
     const newIsLiked = !isLiked;
-    const newLikeCount = newIsLiked ? likeCount + 1 : likeCount - 1;
+    const newLikeCount = newIsLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
     
     // Optimistically update UI
     setIsLiked(newIsLiked);
     setLikeCount(newLikeCount);
     
     try {
-      await onLike(id, newIsLiked);
+      const updatedLikeCount = await onLike(id, newIsLiked);
+      setLikeCount(updatedLikeCount); // Update with the count from the server
       
       // Update local storage
       const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
