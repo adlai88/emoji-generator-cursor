@@ -8,7 +8,7 @@ interface EmojiCardProps {
   id: number;
   src: string;
   alt: string;
-  initialLikes: number;
+  currentLikes: number;  // Change this from initialLikes to currentLikes
   onLike: (id: number, liked: boolean) => Promise<void>;
 }
 
