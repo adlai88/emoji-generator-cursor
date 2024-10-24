@@ -24,7 +24,7 @@ export default function Home() {
   useEffect(() => {
     if (isLoaded && userId) {
       fetchEmojis();
-      const unsubscribe = subscribeToNewEmojis();
+      const unsubscribe = subscribeToEmojiChanges();
       return () => {
         unsubscribe();
       };
@@ -46,7 +46,7 @@ export default function Home() {
     }
   };
 
-  const subscribeToNewEmojis = () => {
+  const subscribeToEmojiChanges = () => {
     console.log('Attempting to subscribe to emoji changes');
     const channel = supabase
       .channel('emoji_changes')
@@ -55,6 +55,15 @@ export default function Home() {
         (payload) => {
           console.log('New emoji received:', payload.new);
           setEmojis(prevEmojis => [payload.new as Emoji, ...prevEmojis]);
+        }
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'emojis' },
+        (payload) => {
+          console.log('Emoji updated:', payload.new);
+          setEmojis(prevEmojis => prevEmojis.map(emoji => 
+            emoji.id === payload.new.id ? { ...emoji, ...payload.new as Emoji } : emoji
+          ));
         }
       )
       .subscribe((status) => {
