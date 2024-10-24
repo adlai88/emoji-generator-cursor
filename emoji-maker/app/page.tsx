@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import debounce from 'lodash/debounce';
 import EmojiForm from "@/components/emoji-form";
 import { EmojiGrid } from "@/components/EmojiGrid";
 import { useAuth } from "@clerk/nextjs";
@@ -78,6 +79,7 @@ export default function Home() {
   };
 
   const debouncedLikeUpdate = useCallback(
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     debounce(async (emojiId: number, liked: boolean) => {
       try {
         const response = await fetch('/api/like-emoji', {
