@@ -77,6 +77,56 @@ export default function Home() {
     };
   };
 
+  const debouncedLikeUpdate = useCallback(
+    debounce(async (emojiId: number, liked: boolean) => {
+      try {
+        const response = await fetch('/api/like-emoji', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ emojiId, liked })
+        });
+        const data = await response.json();
+        console.log('Server response:', data);
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        // Update with the actual server response
+        setEmojis(prevEmojis =>
+          prevEmojis.map(emoji =>
+            emoji.id === emojiId
+              ? { ...emoji, likes_count: data.likesCount }
+              : emoji
+          )
+        );
+      } catch (error) {
+        console.error('Error updating like:', error);
+        // Revert the optimistic update if there's an error
+        setEmojis(prevEmojis =>
+          prevEmojis.map(emoji =>
+            emoji.id === emojiId
+              ? { ...emoji, likes_count: liked ? emoji.likes_count - 1 : emoji.likes_count + 1 }
+              : emoji
+          )
+        );
+      }
+    }, 300),
+    []
+  );
+
+  const handleLike = async (emojiId: number, liked: boolean) => {
+    // Optimistically update the UI
+    setEmojis(prevEmojis =>
+      prevEmojis.map(emoji =>
+        emoji.id === emojiId
+          ? { ...emoji, likes_count: liked ? emoji.likes_count + 1 : emoji.likes_count - 1 }
+          : emoji
+      )
+    );
+
+    // Debounced server update
+    debouncedLikeUpdate(emojiId, liked);
+  };
+
   const handleEmojiGenerated = async (prompt: string) => {
     setIsLoading(true);
     setError(null);
@@ -99,32 +149,6 @@ export default function Home() {
       setError('Failed to generate emoji');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleLike = async (emojiId: number, liked: boolean) => {
-    try {
-      const response = await fetch('/api/like-emoji', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emojiId, liked })
-      });
-      const data = await response.json();
-      console.log('Server response:', data);
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      // Update the emojis state with the new likes count from the server
-      setEmojis(prevEmojis =>
-        prevEmojis.map(emoji =>
-          emoji.id === emojiId
-            ? { ...emoji, likes_count: data.likesCount }
-            : emoji
-        )
-      );
-      console.log('Emojis after update:', emojis); // Add this line
-    } catch (error) {
-      console.error('Error updating like:', error);
     }
   };
 

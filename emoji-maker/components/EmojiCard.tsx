@@ -26,21 +26,29 @@ export function EmojiCard({ id, src, alt, currentLikes, onLike }: EmojiCardProps
   }, [id, currentLikes]);
 
   const handleLike = async () => {
+    const newIsLiked = !isLiked;
+    const newLikeCount = newIsLiked ? likeCount + 1 : likeCount - 1;
+    
+    // Optimistically update UI
+    setIsLiked(newIsLiked);
+    setLikeCount(newLikeCount);
+    
     try {
-      await onLike(id, !isLiked);
-      setIsLiked(!isLiked);
-      setLikeCount(prevCount => isLiked ? prevCount - 1 : prevCount + 1);
+      await onLike(id, newIsLiked);
       
       // Update local storage
       const likedImages = JSON.parse(localStorage.getItem('likedImages') || '{}');
-      if (isLiked) {
-        delete likedImages[id];
-      } else {
+      if (newIsLiked) {
         likedImages[id] = true;
+      } else {
+        delete likedImages[id];
       }
       localStorage.setItem('likedImages', JSON.stringify(likedImages));
     } catch (error) {
       console.error('Error updating like:', error);
+      // Revert UI if the server request fails
+      setIsLiked(!newIsLiked);
+      setLikeCount(likeCount);
     }
   };
 
